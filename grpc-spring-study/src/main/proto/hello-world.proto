@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "com.fredsonchaves07";
+option java_multiple_files = true;
+
+package com.fredsonchaves07;
+
+service HelloService {
+  rpc Hello(HelloReq) returns (HelloRes);
+}
+
+message HelloReq {
+  string message = 1;
+}
+
+message HelloRes {
+  string message = 1;
+}
