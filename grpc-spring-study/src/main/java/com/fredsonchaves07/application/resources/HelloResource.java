@@ -1,4 +1,4 @@
-package com.fredsonchaves07.resources;
+package com.fredsonchaves07.application.resources;
 
 import com.fredsonchaves07.HelloReq;
 import com.fredsonchaves07.HelloRes;
