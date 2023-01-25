@@ -1,4 +1,4 @@
-package application.services;
+package com.fredsonchaves07.application.services;
 
 import com.fredsonchaves07.application.dto.ProductInputDTO;
 import com.fredsonchaves07.application.dto.ProductOutputDTO;
