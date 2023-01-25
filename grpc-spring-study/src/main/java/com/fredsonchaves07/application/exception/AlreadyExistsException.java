@@ -4,7 +4,7 @@ import io.grpc.Status;
 
 public class AlreadyExistsException extends BaseBusinessException{
 
-    private static final String ERROR_MESSAGE = "Produto %s já cadastrado no sistema";
+    private static final String ERROR_MESSAGE = "Produto %s cadastrado no sistema";
 
     private final String name;
 

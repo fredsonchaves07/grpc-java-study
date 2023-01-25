@@ -3,10 +3,11 @@ package com.fredsonchaves07.application.grpc;
 import com.fredsonchaves07.ProductRequest;
 import com.fredsonchaves07.ProductResponse;
 import com.fredsonchaves07.ProductServiceGrpc;
-import com.fredsonchaves07.application.exception.AlreadyExistsException;
+import com.fredsonchaves07.domain.repository.ProductRepository;
 import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.assertj.core.api.Assertions;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class ProductGrpcIntegrationTest {
     private Flyway flyway;
 
     @BeforeEach
-    public void setUp() {
+    private void setUp() {
         flyway.clean();
         flyway.migrate();
     }
@@ -31,7 +32,7 @@ public class ProductGrpcIntegrationTest {
     public void createProductSucessTest() {
         ProductRequest productRequest = ProductRequest.newBuilder()
                 .setName("Product 1")
-                .setPrice(10.0)
+                .setPrice(10)
                 .setQuantityInStock(100)
                 .build();
         ProductResponse productResponse = serviceBlockingStub.create(productRequest);
@@ -44,12 +45,12 @@ public class ProductGrpcIntegrationTest {
     @Test
     public void createProductExceptionTest() {
         ProductRequest productRequest = ProductRequest.newBuilder()
-                .setName("Product A")
-                .setPrice(10.99)
+                .setName("Product B")
+                .setPrice(25.6)
                 .setQuantityInStock(10)
                 .build();
         Assertions.assertThatExceptionOfType(StatusRuntimeException.class)
                 .isThrownBy(() -> serviceBlockingStub.create(productRequest))
-                .withMessage("ALREADY_EXISTS: Produto Product A já cadastrado no sistema");
+                .withMessage("ALREADY_EXISTS: Produto Product B cadastrado no sistema");
     }
 }
