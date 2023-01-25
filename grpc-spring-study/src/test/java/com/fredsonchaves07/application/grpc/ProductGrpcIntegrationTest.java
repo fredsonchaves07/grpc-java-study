@@ -3,9 +3,13 @@ package com.fredsonchaves07.application.grpc;
 import com.fredsonchaves07.ProductRequest;
 import com.fredsonchaves07.ProductResponse;
 import com.fredsonchaves07.ProductServiceGrpc;
+import com.fredsonchaves07.application.exception.AlreadyExistsException;
+import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -13,6 +17,15 @@ public class ProductGrpcIntegrationTest {
 
     @GrpcClient("inProcess")
     private ProductServiceGrpc.ProductServiceBlockingStub serviceBlockingStub;
+
+    @Autowired
+    private Flyway flyway;
+
+    @BeforeEach
+    public void setUp() {
+        flyway.clean();
+        flyway.migrate();
+    }
 
     @Test
     public void createProductSucessTest() {
@@ -26,5 +39,17 @@ public class ProductGrpcIntegrationTest {
                 .usingRecursiveComparison()
                 .comparingOnlyFields("name", "price", "quantity_in_stock")
                 .isEqualTo(productResponse);
+    }
+
+    @Test
+    public void createProductExceptionTest() {
+        ProductRequest productRequest = ProductRequest.newBuilder()
+                .setName("Product A")
+                .setPrice(10.99)
+                .setQuantityInStock(10)
+                .build();
+        Assertions.assertThatExceptionOfType(StatusRuntimeException.class)
+                .isThrownBy(() -> serviceBlockingStub.create(productRequest))
+                .withMessage("ALREADY_EXISTS: Produto Product A já cadastrado no sistema");
     }
 }

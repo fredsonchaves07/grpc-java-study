@@ -1,4 +1,4 @@
-package com.fredsonchaves07.domain.exception;
+package com.fredsonchaves07.application.exception;
 
 import io.grpc.Status;
 

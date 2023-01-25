@@ -2,6 +2,7 @@ package com.fredsonchaves07.application.services;
 
 import com.fredsonchaves07.application.dto.ProductInputDTO;
 import com.fredsonchaves07.application.dto.ProductOutputDTO;
+import com.fredsonchaves07.application.exception.AlreadyExistsException;
 import com.fredsonchaves07.domain.entity.Product;
 import com.fredsonchaves07.domain.repository.ProductRepository;
 import com.fredsonchaves07.domain.services.IProductService;
@@ -21,6 +22,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     @Transactional
     public ProductOutputDTO create(ProductInputDTO inputDTO) {
+        checkDuplicity(inputDTO.name());
         Product product = ProductConverterUtil.toProduct(inputDTO);
         repository.save(product);
         return ProductConverterUtil.toProductOutputDTO(product);
@@ -40,5 +42,12 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductOutputDTO> findAll() {
         return null;
+    }
+
+    private void checkDuplicity(String name) {
+        repository.findByNameIgnoreCase(name)
+                .ifPresent(exception -> {
+                    throw new AlreadyExistsException(name);
+                });
     }
 }

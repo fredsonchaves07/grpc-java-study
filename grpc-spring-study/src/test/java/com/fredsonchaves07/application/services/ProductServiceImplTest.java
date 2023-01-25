@@ -2,6 +2,7 @@ package com.fredsonchaves07.application.services;
 
 import com.fredsonchaves07.application.dto.ProductInputDTO;
 import com.fredsonchaves07.application.dto.ProductOutputDTO;
+import com.fredsonchaves07.application.exception.AlreadyExistsException;
 import com.fredsonchaves07.application.services.ProductServiceImpl;
 import com.fredsonchaves07.domain.entity.Product;
 import com.fredsonchaves07.domain.repository.ProductRepository;
@@ -13,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceImplTest {
@@ -32,6 +35,16 @@ public class ProductServiceImplTest {
         ProductOutputDTO productOutputDTO = service.create(productInputDTO);
         Assertions.assertThat(productOutputDTO)
                 .usingRecursiveComparison()
+                .comparingOnlyFields("name", "price", "quantity_in_stock")
                 .isEqualTo(product);
+    }
+
+    @Test
+    public void createProductException() {
+        Product product = new Product(1L, "Product test", 10.99, 10);
+        Mockito.when(repository.findByNameIgnoreCase(Mockito.any())).thenReturn(Optional.of(product));
+        ProductInputDTO productInputDTO = new ProductInputDTO("Product test", 10.99, 10);
+        Assertions.assertThatExceptionOfType(AlreadyExistsException.class)
+                        .isThrownBy(() -> service.create(productInputDTO));
     }
 }
