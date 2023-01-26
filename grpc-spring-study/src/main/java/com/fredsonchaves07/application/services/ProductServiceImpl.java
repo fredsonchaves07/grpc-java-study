@@ -3,6 +3,7 @@ package com.fredsonchaves07.application.services;
 import com.fredsonchaves07.application.dto.ProductInputDTO;
 import com.fredsonchaves07.application.dto.ProductOutputDTO;
 import com.fredsonchaves07.application.exception.AlreadyExistsException;
+import com.fredsonchaves07.application.exception.NotFoundException;
 import com.fredsonchaves07.domain.entity.Product;
 import com.fredsonchaves07.domain.repository.ProductRepository;
 import com.fredsonchaves07.domain.services.IProductService;
@@ -30,7 +31,9 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductOutputDTO findById(Long productId) {
-        return null;
+        Product product = repository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(productId));
+        return ProductConverterUtil.toProductOutputDTO(product);
     }
 
     @Override

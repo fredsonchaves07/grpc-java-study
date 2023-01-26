@@ -4,7 +4,7 @@ import io.grpc.Status;
 
 public class NotFoundException extends BaseBusinessException{
 
-    private static final String ERROR_MESSAGE = "Produto com id %s não encontrado";
+    private static final String ERROR_MESSAGE = "Produto com id %s nao encontrado";
 
     private final Long id;
 

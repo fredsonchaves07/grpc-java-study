@@ -3,6 +3,7 @@ package com.fredsonchaves07.application.services;
 import com.fredsonchaves07.application.dto.ProductInputDTO;
 import com.fredsonchaves07.application.dto.ProductOutputDTO;
 import com.fredsonchaves07.application.exception.AlreadyExistsException;
+import com.fredsonchaves07.application.exception.NotFoundException;
 import com.fredsonchaves07.application.services.ProductServiceImpl;
 import com.fredsonchaves07.domain.entity.Product;
 import com.fredsonchaves07.domain.repository.ProductRepository;
@@ -46,5 +47,25 @@ public class ProductServiceImplTest {
         ProductInputDTO productInputDTO = new ProductInputDTO("Product test", 10.99, 10);
         Assertions.assertThatExceptionOfType(AlreadyExistsException.class)
                         .isThrownBy(() -> service.create(productInputDTO));
+    }
+
+    @Test
+    public void findByIdProductSucess() {
+        Long id = 1L;
+        Product product = new Product(1L, "Product test", 10.99, 10);
+        Mockito.when(repository.findById(Mockito.any())).thenReturn(Optional.of(product));
+        ProductOutputDTO productOutputDTO = service.findById(id);
+        Assertions.assertThat(productOutputDTO)
+                .usingRecursiveComparison()
+                .comparingOnlyFields("name", "price", "quantity_in_stock")
+                .isEqualTo(product);
+    }
+
+    @Test
+    public void findByIdProductException() {
+        Long id = 100L;
+        Mockito.when(repository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Assertions.assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> service.findById(id));
     }
 }
