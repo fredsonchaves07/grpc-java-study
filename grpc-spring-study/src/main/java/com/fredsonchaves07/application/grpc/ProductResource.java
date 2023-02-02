@@ -1,15 +1,14 @@
 package com.fredsonchaves07.application.grpc;
 
-import com.fredsonchaves07.ProductRequest;
-import com.fredsonchaves07.ProductResponse;
-import com.fredsonchaves07.ProductServiceGrpc;
-import com.fredsonchaves07.RequestById;
+import com.fredsonchaves07.*;
 import com.fredsonchaves07.application.dto.ProductInputDTO;
 import com.fredsonchaves07.application.dto.ProductOutputDTO;
 import com.fredsonchaves07.domain.services.IProductService;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 @GrpcService
 public class ProductResource extends ProductServiceGrpc.ProductServiceImplBase {
@@ -41,6 +40,30 @@ public class ProductResource extends ProductServiceGrpc.ProductServiceImplBase {
                 .setPrice(productOutputDTO.price())
                 .setQuantityInStock(productOutputDTO.quantityInStock()).build();
         responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void delete(RequestById request, StreamObserver<EmptyResponse> responseObserver) {
+        service.delete(request.getId());
+        responseObserver.onNext(EmptyResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void findAll(EmptyRequest request, StreamObserver<ProductResponseList> responseObserver) {
+        List<ProductOutputDTO> outputDTOS = service.findAll();
+        List<ProductResponse> productResponses = outputDTOS.stream()
+                .map(product ->
+                        ProductResponse.newBuilder()
+                                .setId(product.id())
+                                .setName(product.name())
+                                .setPrice(product.price())
+                                .setQuantityInStock(product.quantityInStock()).build())
+                .toList();
+        ProductResponseList build = ProductResponseList.newBuilder()
+                .addAllProducts(productResponses).build();
+        responseObserver.onNext(build);
         responseObserver.onCompleted();
     }
 }

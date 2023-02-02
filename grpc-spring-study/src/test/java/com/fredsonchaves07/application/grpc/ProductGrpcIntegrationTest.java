@@ -1,11 +1,6 @@
 package com.fredsonchaves07.application.grpc;
 
-import com.fredsonchaves07.ProductRequest;
-import com.fredsonchaves07.ProductResponse;
-import com.fredsonchaves07.ProductServiceGrpc;
-import com.fredsonchaves07.RequestById;
-import com.fredsonchaves07.application.exception.NotFoundException;
-import com.fredsonchaves07.domain.repository.ProductRepository;
+import com.fredsonchaves07.*;
 import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.assertj.core.api.Assertions;
@@ -14,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 @SpringBootTest
 public class ProductGrpcIntegrationTest {
@@ -71,5 +68,35 @@ public class ProductGrpcIntegrationTest {
         Assertions.assertThatExceptionOfType(StatusRuntimeException.class)
                 .isThrownBy(() -> serviceBlockingStub.findById(request))
                 .withMessage("NOT_FOUND: Produto com id 1 nao encontrado");
+    }
+
+    @Test
+    public void deleteProductSucess() {
+        RequestById request = RequestById.newBuilder()
+                .setId(100L).build();
+        Assertions.assertThatNoException().isThrownBy(() -> serviceBlockingStub.delete(request));
+    }
+
+    @Test
+    public void deleteProductExceptionTest() {
+        RequestById request = RequestById.newBuilder()
+                .setId(1L).build();
+        Assertions.assertThatExceptionOfType(StatusRuntimeException.class)
+                .isThrownBy(() -> serviceBlockingStub.delete(request))
+                .withMessage("NOT_FOUND: Produto com id 1 nao encontrado");
+    }
+
+    @Test
+    public void findAllSucessTest() {
+        EmptyRequest request = EmptyRequest.newBuilder().build();
+        ProductResponseList responseList = serviceBlockingStub.findAll(request);
+        Assertions.assertThat(responseList).isInstanceOf(ProductResponseList.class);
+        Assertions.assertThat(responseList.getProductsCount()).isEqualTo(2);
+        Assertions.assertThat(responseList.getProductsList())
+                .extracting("id", "name", "price", "quantityInStock")
+                .contains(
+                        tuple(100L, "Product A", 10.9, 10),
+                        tuple(200L, "Product B", 25.6, 100)
+                );
     }
 }

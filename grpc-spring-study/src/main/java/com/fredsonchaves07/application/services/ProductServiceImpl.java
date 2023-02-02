@@ -39,12 +39,15 @@ public class ProductServiceImpl implements IProductService {
     @Override
     @Transactional
     public void delete(Long productId) {
-
+        Product product = repository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(productId));
+        repository.delete(product);
     }
 
     @Override
     public List<ProductOutputDTO> findAll() {
-        return null;
+        return repository.findAll().stream().map(
+                product -> new ProductOutputDTO(product.getId(), product.getName(), product.getPrice(), product.getQuantityInStock())).toList();
     }
 
     private void checkDuplicity(String name) {

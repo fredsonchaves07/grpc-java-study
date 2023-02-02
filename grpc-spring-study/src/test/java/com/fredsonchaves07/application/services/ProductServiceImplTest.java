@@ -16,7 +16,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.*;
+
 import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceImplTest {
@@ -67,5 +71,39 @@ public class ProductServiceImplTest {
         Mockito.when(repository.findById(Mockito.any())).thenReturn(Optional.empty());
         Assertions.assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> service.findById(id));
+    }
+
+    @Test
+    public void deleteProductSucess() {
+        Long id = 1L;
+        Product product = new Product(1L, "Product test", 10.99, 10);
+        Mockito.when(repository.findById(Mockito.any())).thenReturn(Optional.of(product));
+        Assertions.assertThatNoException().isThrownBy(() -> service.delete(id));
+    }
+
+    @Test
+    public void deleteProductException() {
+        Long id = 100L;
+        Mockito.when(repository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Assertions.assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> service.delete(id));
+    }
+
+    @Test
+    public void getAllSucessProduct() {
+        List<Product> products = List.of(
+                new Product(1L, "Product test", 10.99, 10),
+                new Product(2L, "Product 1", 10.99, 10),
+                new Product(3L, "Product 2", 10.99, 10)
+        );
+        Mockito.when(repository.findAll()).thenReturn(products);
+        List<ProductOutputDTO> outputDTOS = service.findAll();
+        Assertions.assertThat(outputDTOS)
+                .extracting("id", "name", "price", "quantityInStock")
+                .contains(
+                        tuple(1L, "Product test", 10.99, 10),
+                        tuple(2L, "Product 1", 10.99, 10),
+                        tuple(3L, "Product 2", 10.99, 10)
+                );
     }
 }
